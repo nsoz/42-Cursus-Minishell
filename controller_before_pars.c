@@ -3,71 +3,101 @@
 /*                                                        :::      ::::::::   */
 /*   controller_before_pars.c                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: muoz <muoz@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: asenel <asenel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/20 23:12:32 by muoz              #+#    #+#             */
-/*   Updated: 2024/04/21 03:34:58 by muoz             ###   ########.fr       */
+/*   Updated: 2024/04/24 19:46:07 by asenel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	ft_check_quote(char *command_line) // tırnak açılıp kapandı mı
+/* int	ft_check_quote(char *command_line)
 {
-	int	i;
+	int i;
+	int single_quote_open = 0;
+	int double_quote_open = 0;
 
 	i = -1;
 	while (command_line[++i] != '\0')
 	{
 		if (command_line[i] == '\'')
 		{
-			while (command_line[++i] != '\0')
-				if (command_line[i] == '\'')
-					break ;
-			if (command_line[i] == '\0')
-				ft_error_message(1);
+			if (!single_quote_open)
+				single_quote_open = 1;
+			else
+				single_quote_open = 0; // kapalı '
 		}
 		if (command_line[i] == '\"')
 		{
-			while (command_line[++i] != '\0')
-				if (command_line[i] == '\"')
-					break ;
-			if (command_line[i] == '\0')
-				ft_error_message(1);
+			if (!double_quote_open)
+				double_quote_open = 1;
+			else
+				double_quote_open = 0; // kapali "
 		}
 	}
+	if (single_quote_open || double_quote_open)
+	{
+		ft_error_message(1);
+		return 1; // kapanmamışşş
+	}
+
+	return 0; // Bir problem yok
+}
+*/
+
+int ft_check_quote(char *command_line) {
+    int i = 0;
+    char current_quote;
+
+    while (command_line[i] != '\0') {
+        // Check if current character is a quote
+        if (command_line[i] == '\'' || command_line[i] == '\"') {
+            current_quote = command_line[i];  // Store the current quote type
+            i++;
+            // Look for the closing quote of the same type
+            while (command_line[i] != '\0' && command_line[i] != current_quote)
+                i++;
+            
+            // If end of string is reached without finding a closing quote
+            if (command_line[i] == '\0') {
+                ft_error_message(1);
+                return 1;  // Return 1 indicating unclosed quote
+            }
+        }
+        i++;  // Move to the next character
+    }
+    return 0;  // Return 0 if all quotes are properly closed
 }
 
-void	ft_orientation_loc(char *command_line) // redirection en sonda olup olamdığını kontrol eder
+int ft_orientation_loc(char *command_line)
 {
-	int	i;
+    int i;
 
-	i = strlen(command_line);
-	while (command_line[--i])
-	{
-		while (command_line[i] == ' ')
-			i--;
-		if (command_line[i] == '<' || command_line[i] == '>')
-		{
-			ft_error_message(2);
-			break ;
-		}
-		else
-			break ;
-	}
+	i = strlen(command_line) - 1;
+    while (i >= 0 && command_line[i] == ' ')
+        i--;
+    if (i >= 0 && (command_line[i] == '<' || command_line[i] == '>'))
+    {
+        ft_error_message(2);
+        return 1; // sonda redirection var
+    }
+
+    return 0; // sonda redirection yok
 }
 
-void	ft_pipe_loc(char *command_line) // pipe ın en başta olup olamdığını kontrol eder
-{
-	int	i;
 
-	i = -1;
-	while (command_line[++i])
-	{
-		if (i == 0 && command_line[i] == ' ')
-			while (command_line[i] && command_line[i] == ' ') //varsa boşlukları atlar
-				i++;
-		if (command_line[i] && command_line[i] == '|')
-			ft_error_message(3);
-	}
+int ft_pipe_loc(char *command_line)
+{
+    int i;
+
+	i = 0;
+    while (command_line[i] == ' ')
+        i++;
+    if (command_line[i] == '|')
+    {
+        ft_error_message(3);
+        return 1; // başta pipe var
+    }
+    return 0; // başta pipe yok
 }

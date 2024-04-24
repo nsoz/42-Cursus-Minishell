@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   mini_shell.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: muoz <muoz@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: asenel <asenel@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/20 21:29:02 by muoz              #+#    #+#             */
-/*   Updated: 2024/04/21 03:35:10 by muoz             ###   ########.fr       */
+/*   Updated: 2024/04/24 19:34:53 by asenel           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,69 +22,86 @@ void	ft_error_message(int flag)
 		printf(" syntax error near unexpected token `|'\n");
 }
 
-void	ft_pass_quote(char *command_line, int *i)
-{
-	int	quote_flag;
+#include <stdio.h>
 
-	if (command_line[*i] == '\"') //tırnak türüne göre flag belirleme
-		quote_flag = 1;
-	if (command_line[*i] == '\'') //tırnak türüne göre flag belirleme
-		quote_flag = 2;
-	while (command_line[++*i]) //flage göre gerekli tırnağı bulana kadar yani tırnak kapanana kadar ilerleme
-	{
-		if ((quote_flag == 1 && command_line[*i] == '\"') 
-			|| (quote_flag == 2 && command_line[*i] == '\''))
-		{
-			quote_flag = 0; //flag sıfırlama ölesine :p
-			break ;
-		}
-	}
+void ft_pass_quote(char *command_line, int *i) {
+    int quote_flag = 0;
+
+    if (command_line[*i] == '\"') // Determine flag based on the type of quote
+        quote_flag = 1;
+    else if (command_line[*i] == '\'')
+        quote_flag = 2;
+
+    // Move forward until the corresponding closing quote is found
+    while (command_line[++*i]) {
+        if ((quote_flag == 1 && command_line[*i] == '\"') ||
+            (quote_flag == 2 && command_line[*i] == '\'')) {
+            (*i)++;  // Move past the closing quote
+            break;
+        }
+    }
 }
 
-int	ft_layer_cal(char *command_line)
-{
-	int	i;
-	int	quote_flag;
-	int	ret; //katman değeri dömüş değeri
+int ft_layer_cal(char *command_line) {
+    int i = 0;
+    int ret = 0;
 
-	ret = 0;
-	i = -1;
-	while (command_line[++i])
-	{
-		if (i == 0 && command_line[i] == ' ') //dışarıdan gelen verilerimiz boşluk ile başlıyorsan katman değerimizi artırmadan sadece boşlukları geçiyoruz
-			while (command_line && command_line[i] == ' ')
-				i++;
-		if (command_line[i] == '\"' || command_line[i] == '\'') //pre_parstan geçen doğru tırnak kullanımı ile tırnak içeriğini tüm seperatörlerden muaf tutmak için geçiyoruz
-			ft_pass_quote(command_line, &i);
-		if (command_line[i] == ' ' || command_line[i] == '|'
-			|| command_line[i] == '>' || command_line[i] == '<') //seperatörlerimizi belirledik ve her biri için fazla fazlada olsa yer açıyoruz
-		{
-			while (command_line[i] && command_line[i] == ' ') // boşluk karakteri  diğer seplerden ziyade kendisi için yer açmamalı o yüzden geçiyoruz
-				i++;
-			if (command_line[i] != '\0') // boşluk karakteri en sonda ise katman değeri artmamalı bunun kontrolünü yapıyoruz
-				ret++;
-		}
-	}
-	return (ret + 1); //burayı çok sorgulama burayı bende tam anlamadım ama böle olmalı bu
+    while (command_line[i]) {
+        // Skip spaces to find the start of a segment
+        while (command_line[i] == ' ') i++;
+
+        // If we reach the end of the string after skipping spaces, break
+        if (command_line[i] == '\0') break;
+
+        // Start a new segment
+        ret++;
+
+        // Move to the end of the current segment
+        while (command_line[i] && command_line[i] != ' ' && command_line[i] != '|' && command_line[i] != '>' && command_line[i] != '<') {
+            if (command_line[i] == '\"' || command_line[i] == '\'') {
+                ft_pass_quote(command_line, &i);
+            } else {
+                i++;
+            }
+        }
+
+        // Skip the separator and handle case where separator is at the end
+        if (command_line[i] && (command_line[i] == '|' || command_line[i] == '>' || command_line[i] == '<')) {
+            i++;
+            if (command_line[i] == '\0') { // Check if the separator is at the end
+                break;
+            }
+        }
+    }
+
+    return ret;
 }
 
-void	ft_pre_pars(char *command_line)
+int	ft_pre_pars(char *command_line)
 {
-	ft_check_quote(command_line); //burada " ve ' için kapanmama durumu kontrol ediliyor
-	ft_pipe_loc(command_line); //burada ">>" , "<<" ve ">" , "<" operatörlerinin en sonda bulunma durumu kontrol ediliyor
-	ft_orientation_loc(command_line); //burada ">>" , "<<" ve ">" , "<" operatörlerinin en sonda bulunma durumu kontrol ediliyor
+	int error;
+
+	error = 0;
+	error += ft_check_quote(command_line); //burada " ve ' için kapanmama durumu kontrol ediliyor
+	error += ft_pipe_loc(command_line); //pipe başta olup olmadığını 
+	error += ft_orientation_loc(command_line); //burada ">>" , "<<" ve ">" , "<" operatörlerinin en sonda bulunma durumu kontrol ediliyor
+	return (error);
 }
 
 void	parse_command(char *command_line)
 {
 	int		i;
 	t_data	*data;
+	int 	error;
 
-	ft_pre_pars(command_line); //tokenlerle ilgili yanlış kullanımları önceden pars ettiğimiz kısım
+	error = ft_pre_pars(command_line); //tokenlerle ilgili yanlış kullanımları önceden pars ettiğimiz kısım
+	if (!error)
+	{
 	data = malloc(sizeof(t_data)); //data ya yer ayırdık
 	data->layer = ft_layer_cal(command_line); //datanın içerisinde bulunana int'e vewrdiğimiz komut satırını kaç katmanlı çift pointer'a ekliyeceğimizi belirliyoruz
+	printf("->>>>%d\n", data->layer);
 	data->command = malloc((data->layer + 1) * sizeof(char *)); //sondaki NULL pointerı da hesaba katıp yer açıyoruz
-
+	}
 	//Sevgili acar kodun şuanlık sonuna geldik malesef yarın mazın hayatın sert rüzgaralrının estiği zor koşulların diz boyu yükseldiği inşaat sektöründe çalışmaya gideceğimden saat 3:15 sularında uyuyacağım
 	//anlayamadığın bir kısım olursa ----> 05423621593 <----- ban bu nbumaradan ulaşabilirsin en aşşağıda genel çözülmesi gereken sorunları yazdım 
 }
@@ -95,7 +112,7 @@ int main()
 
     while (1)
 	{
-		command_line = readline("Bir sey gir yarram: "); //dışarıdan veri alımı
+		command_line = readline("my shell: "); //dışarıdan veri alımı
         if (command_line == NULL) {
             printf("An error occurred.\n");
             continue;
