@@ -6,11 +6,66 @@
 /*   By: muoz <muoz@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 16:36:32 by muoz              #+#    #+#             */
-/*   Updated: 2024/04/25 20:13:30 by muoz             ###   ########.fr       */
+/*   Updated: 2024/04/26 01:02:30 by muoz             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+int	ft_rep_cal(t_data *data, char *reb, int repeat)
+{
+	int	i;
+	int	err;
+
+	err = 0;
+	i = -1;
+	while (data->command[++i] != NULL)
+	{
+		if (!ft_strncmp(data->command[i], reb, ft_strlen(data->command[i])))
+			err++;
+		else
+		{
+			if (err >= repeat)
+				break ;
+			err = 0;
+		}
+	}
+	if (err == repeat)
+		return (1);
+	else if (err == (repeat + 1))
+		return (2);
+	else if (err > (repeat + 1))
+		return (3);
+	return (0);
+}
+
+int	ft_check_flag(int error, char c)
+{
+	if (error == 1)
+		printf("syntax error near unexpected token `%c'\n", c);
+	else if (!(error == 3 && c == '<'))
+		printf("syntax error near unexpected token `%c%c'\n", c, c);
+	else
+		printf("syntax error near unexpected token `%c%c%c'\n", c, c, c);
+	return (error);
+}
+
+int	ft_after_pars(t_data *data)
+{
+	int	error;
+
+	error = 0;
+	error += ft_rep_cal(data, "|", 3);
+	if (error)
+		return (ft_check_flag(error, '|'));
+	error += ft_rep_cal(data, ">", 3);
+	if (error)
+		return (ft_check_flag(error, '>'));
+	error += ft_rep_cal(data, "<", 4);
+	if (error)
+		return (ft_check_flag(error, '<'));
+	return (error);
+}
 
 int	ft_is_inc(char c)
 {
@@ -63,11 +118,5 @@ void	ft_put_input(t_data *data, char *command_line)
 		data->command[i] = ft_parser(command_line, &com_index, sub_index, 0);
 	}
 	data->command[i] = NULL;
-	i = 0;
-	while (data->command[i] != NULL)
-	{
-		printf("%s\n", data->command[i]);
-		i++;
-	}
-	printf("%d\n", i);
+	ft_after_pars(data);
 }
