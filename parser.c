@@ -6,21 +6,21 @@
 /*   By: muoz <muoz@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 16:29:27 by muoz              #+#    #+#             */
-/*   Updated: 2024/04/25 20:15:19 by muoz             ###   ########.fr       */
+/*   Updated: 2024/05/03 01:26:13 by muoz             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	ft_error_message(int flag)
-{
-	if (flag == 1)
-		printf("Not interpret unclosed quotes\n");
-	if (flag == 2)
-		printf("syntax error near unexpected token `newline'\n");
-	if (flag == 3)
-		printf("syntax error near unexpected token `|'\n");
-}
+// void	ft_error_message(int flag)
+// {
+// 	if (flag == 1)
+// 		printf("Not interpret unclosed quotes\n");
+// 	if (flag == 2)
+// 		printf("syntax error near unexpected token `newline'\n");
+// 	if (flag == 3)
+// 		printf("syntax error near unexpected token `|'\n");
+// }
 
 void	ft_pass_quote(char *command_line, int *i)
 {
@@ -70,32 +70,32 @@ int	ft_layer_cal(char *command_line, int i, int ret)
 	return (ret);
 }
 
-int	ft_pre_pars(char *command_line)
-{
-	int	error;
+// int	ft_pre_pars(char *command_line)
+// {
+// 	int	error;
 
-	error = 0;
-	error += ft_pipe_loc(command_line);
-	if (error)
-		return (error);
-	error += ft_check_quote(command_line);
-	if (error)
-		return (error);
-	error += ft_orientation_loc(command_line);
-	return (error);
-}
+// 	error = 0;
+// 	error += ft_pipe_loc(command_line);
+// 	if (error)
+// 		return (error);
+// 	error += ft_check_quote(command_line);
+// 	if (error)
+// 		return (error);
+// 	error += ft_orientation_loc(command_line);
+// 	return (error);
+// }
 
 void	parse_command(char *command_line)
 {
 	t_data	*data;
-	int		error;
+	// int		error;
 
-	error = ft_pre_pars(command_line);
-	if (!error)
-	{
+	// error = ft_pre_pars(command_line);
+	// if (!error)
+	// {
 		data = malloc(sizeof(t_data));
 		data->layer = ft_layer_cal(command_line, 0, 0);
 		data->command = malloc((data->layer + 1) * sizeof(char *));
 		ft_put_input(data, command_line);
-	}
+	// }
 }

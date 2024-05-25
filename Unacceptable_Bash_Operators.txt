@@ -1,0 +1,73 @@
+
+List of Unacceptable Bash Operator Combinations
+------------------------------------------------
+1. >< - Switching redirection directions without targets.
+2. <> - Reversing redirection directions immediately, not valid.
+3. |> - Piping output into redirection without a command, invalid syntax.
+4. <| - Input redirection feeding directly into a pipe without a command, invalid syntax.
+5. >>| - Appending output directly to a pipe without a command, not valid.
+6. |< - Starting a pipeline with input redirection symbol, invalid without a preceding command.
+7. >| - Using force overwrite redirection to start a pipe, syntactically incorrect.
+8. || - While valid as a logical operator, incorrect when considering piping or redirection alone.
+9. ><> - Combining multiple redirections without commands or filenames, causing errors.
+10. <>>< - Invalid sequential redirections without commands.
+11. <<| or |<< - Using a here-document directly next to a pipe without an intervening command, not correct.
+12. >><< - Mixing append and here-document redirections sequentially without commands, invalid.
+
+|||||||||||||||||||||--------------------------o||||||||------------------------------|-||
+
+
+Bash'da >, <, ve | işleçlerinin farklı şekillerde bir araya getirilmesiyle oluşabilecek hatalı kombinasyonları sıralamak için, bu işleçlerin her birinin işlevini ve kullanıldığı yerleri anlamak önemlidir. İşte bu işleçlerle oluşturulabilecek hatalı kombinasyonlar:
+
+>< - Çıktı yönlendirmeyi hemen girdi yönlendirmesiyle takip etmek, herhangi bir ara komut veya dosya adı olmadan, mantıksız ve hatalıdır.
+<> - Girdi yönlendirmeyi hemen çıktı yönlendirmesiyle takip etmek, dosya adı veya komut olmadan, geçersizdir.
+>| - Bir çıktı yönlendirme işleminden sonra hemen pipe kullanmak, geçersizdir çünkü pipe'ın bir girdiye ihtiyacı vardır.
+<| - Bir girdi yönlendirmesinden sonra hemen pipe kullanmak, yine geçersizdir çünkü bu durumda pipe işlemi için gerekli çıktı yoktur.
+|> - Bir pipe işleminden sonra hemen bir çıktı yönlendirme işlemi kullanmak, mantıksızdır çünkü pipe zaten bir çıktıya bağlanmalıdır.
+|< - Bir pipe işleminden sonra hemen bir girdi yönlendirme işlemi kullanmak, işlevsel değildir çünkü pipe'ın çıktısı bir komuta yönlendirilmelidir.
+>>| - Çıktıyı bir dosyaya eklemek için kullanılan append işleminden sonra pipe kullanmak, uygun değildir çünkü append doğrudan bir dosyaya yöneliktir.
+<<| - Bir here-document başlatıcıdan sonra pipe kullanmak, genellikle geçersizdir çünkü here-document doğrudan bir komut tarafından işlenmelidir.
+|>> - Bir pipe işleminden sonra çıktıyı bir dosyaya eklemek için append kullanmak, genellikle mantıksızdır çünkü pipe zaten bir komuta bağlanmalıdır.
+|<< - Bir pipe işleminden sonra here-document başlatmak, geçersizdir çünkü here-document bir komutla kullanılmalıdır.
+Bu kombinasyonların her biri, Bash syntax'ını ve komut satırında veri akışının nasıl yönetileceğini anlamak için iyi bir örnek teşkil eder. Her bir durumda, işleçlerin doğru bir şekilde kullanılması, komutların ve veri akışının beklenen şekilde çalışmasını sağlamak için hayati önem taşır.
+
+
+
+
+
+||||||||||-----------------------------------------------------------------------------------------------------||||||||||||||
+
+
+
+Anlamları 
+Tabii ki, Bash'ta kullanılan pipe (|) ve çeşitli redirection (>, <, >>, <<) işleçlerinin işlevlerini sırasıyla açıklayalım:
+
+Pipe (|):
+İşlevi: Bir komutun çıktısını başka bir komuta girdi olarak aktarmak için kullanılır. Bu sayede bir komutun işlediği veriler, başka bir komut tarafından daha fazla işlenebilir.
+Örnek: ls -l | grep "May" komutu, ls -l komutunun çıktısını grep "May" komutuna aktarır ve bu komut, çıktı içinden "May" içeren satırları filtreler.
+Redirection (>):
+İşlevi: Bir komutun çıktısını bir dosyaya yönlendirir. Eğer dosya zaten varsa, içeriği bu işlemle üstüne yazılır.
+Örnek: echo "Merhaba" > dosya.txt komutu, "Merhaba" metnini "dosya.txt" adlı dosyaya yazdırır ve eğer dosya önceden içerik barındırıyorsa, içeriği silinir ve yeni içerikle değiştirilir.
+Redirection (<):
+İşlevi: Bir dosyanın içeriğini bir komuta girdi olarak yönlendirir. Bu, dosya içeriğini komutun işlemesi için kullanır.
+Örnek: grep "Merhaba" < dosya.txt komutu, "dosya.txt" dosyasından "Merhaba" kelimesini arar.
+Appending Redirection (>>):
+İşlevi: Bir komutun çıktısını bir dosyanın sonuna ekler. Eğer dosya zaten varsa, içeriğinin sonuna eklenir ve mevcut veriler korunur.
+Örnek: echo "Yeni satır" >> dosya.txt komutu, "Yeni satır" metnini "dosya.txt" dosyasının sonuna ekler, dosyanın mevcut içeriği korunmuş olur.
+Here-document (<<):
+İşlevi: Standart girdiye çok satırlı bir girdi sağlamak için kullanılır. Bu yöntemle, bir komut bloğu içine doğrudan bir metin bloğu yazılabilir ve bu metin komut tarafından işlenir.
+Örnek:
+bash
+Copy code
+cat << EOT
+Bu bir örnek metindir.
+Birden fazla satır içerebilir.
+EOT
+Yukarıdaki komut, cat komutuna EOT ile belirtilen işaretçiye kadar olan metni işlemesi için verir.
+Bu işleçler, Linux ve Unix tabanlı sistemlerde oldukça güçlü ve esnek bir şekilde komutlar arası veri akışını yönetmek için kullanılır.
+
+
+
+
+
+bash cd << cd hata vermezken cd < < cd ye hata vermkte :(

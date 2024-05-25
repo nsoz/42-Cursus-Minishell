@@ -37,29 +37,26 @@ static long int	ft_len(int n)
 	return (len);
 }
 
-char	*ft_itoa(int n)
+char *ft_itoa(int n)
 {
-	char				*s;
-	long int			len;
-	unsigned int		number;
-	int					sign;
+    char            *s;
+    long int        len;
+    unsigned int    number;
 
-	sign = 1;
-	len = ft_len(n);
-	s = (char *)malloc(sizeof(char) * (len + 1));
-	if (!(s))
-		return (NULL);
-	s[len--] = '\0';
-	if (n == 0)
-		s[0] = '0';
-	if (n < 0)
-	{
-		sign *= -1;
-		number = n * -1;
-		s[0] = '-';
-	}
-	else
-		number = n;
-	s = ft_char(s, number, len);
-	return (s);
+    len = ft_len(n);
+    s = (char *)malloc(sizeof(char) * (len + 1));
+    if (!(s))
+        return (NULL);
+    s[len--] = '\0';
+    if (n == 0)
+        s[0] = '0';
+    if (n < 0)
+    {
+        number = -n;
+        s[0] = '-';
+    }
+    else
+        number = n;
+    s = ft_char(s, number, len);
+    return (s);
 }

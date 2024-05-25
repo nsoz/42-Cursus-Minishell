@@ -6,7 +6,7 @@
 /*   By: muoz <muoz@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/25 16:36:32 by muoz              #+#    #+#             */
-/*   Updated: 2024/04/26 01:02:30 by muoz             ###   ########.fr       */
+/*   Updated: 2024/05/03 05:48:39 by muoz             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,21 +50,30 @@ int	ft_check_flag(int error, char c)
 	return (error);
 }
 
-int	ft_after_pars(t_data *data)
+int	ft_after_pars(t_data *data, int *i)
 {
-	int	error;
+	int	tmp;
+	int rflag;
 
-	error = 0;
-	error += ft_rep_cal(data, "|", 3);
-	if (error)
-		return (ft_check_flag(error, '|'));
-	error += ft_rep_cal(data, ">", 3);
-	if (error)
-		return (ft_check_flag(error, '>'));
-	error += ft_rep_cal(data, "<", 4);
-	if (error)
-		return (ft_check_flag(error, '<'));
-	return (error);
+	rflag = 0;
+	tmp = *i;
+	if (ft_quote_err(data->command[*i]))
+	{
+		if (!ft_is_token(data->command[*i])) // düzgün çalıştığına emin olunmalı
+			return (0);
+		if (ft_repeat_err(data->command, data->command[*i][0], i, &rflag)) //repat errde tekrar yapılması taktirinde bir değişkeni 1 yapmamız lazım bu bize tekrar edildiğinde i - 1 e edilmediğinde inin kendisine bakmamızı kolaylaştıracak
+		{
+			if (ft_comb_err(data->command, tmp, (*i - 1))) // kombinasyon kontrollerri baştan yazılacak tmp i faktörleri göz önünde bulundurulacak şekilde 
+			{
+				if (ft_loc_err(data->command[(*i - 1)][0], (*i - 1), ft_dimensionlen(data->command)))
+					return (0);
+				return (1);
+			}
+			return (1);
+		}
+		return (1);
+	}
+	return (1);
 }
 
 int	ft_is_inc(char c)
@@ -109,7 +118,9 @@ void	ft_put_input(t_data *data, char *command_line)
 	int	i;
 	int	com_index;
 	int	sub_index;
+	int	error;
 
+	error = 0;
 	com_index = 0;
 	i = -1;
 	while (++i < data->layer)
@@ -118,5 +129,15 @@ void	ft_put_input(t_data *data, char *command_line)
 		data->command[i] = ft_parser(command_line, &com_index, sub_index, 0);
 	}
 	data->command[i] = NULL;
-	ft_after_pars(data);
+	i = -1;
+	while (data->command[++i] != NULL && !error)
+	{
+		if ((error = ft_after_pars(data, &i)))
+			break ;
+	}
+	if (!error && data->command[i] == NULL)
+	{
+		printf("welcome to lexer\n");
+		// ft_lexer(data->command)
+	}
 }
